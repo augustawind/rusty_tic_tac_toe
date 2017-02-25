@@ -44,20 +44,23 @@ fn draw_board(board: &Board) {
 /// Execute a turn of the game, prompting for input and placing an X or O.
 fn turn(game: &mut Game) {
     loop {
+        // Draw board.
         println!("");
         draw_board(&game.board);
         println!("");
 
+        // Prompt for move.
         println!("Player {}, where will you move?", game.next_move);
-
         let input: String = read!("{}\n");
         let coords: Vec<&str> = input.split(',').collect();
 
+        // Ensure input is properly formatted.
         if coords.len() != 2 {
             println!("Please enter two digits, separated by a comma.");
             continue;
         }
 
+        // Parse coords as usize.
         let x: usize = match coords[0].parse() {
             Ok(n) => n,
             Err(_) => {
@@ -73,16 +76,19 @@ fn turn(game: &mut Game) {
             }
         };
 
+        // Ensure coords are in bounds.
         if x > 2 || y > 2 {
             println!("Coordinates out of bounds. Options are 0, 1, 2.");
             continue;
         }
 
+        // Ensure space is empty for move.
         if game.board[y][x] != 0 {
             println!("Someone has already moved there!");
             continue;
         }
 
+        // Place board piece and iterate turn.
         match game.next_move {
             Player::X => {
                 game.board[y][x] = 1;
