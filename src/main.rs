@@ -31,30 +31,38 @@ struct Game {
 
 /// Draw the game board.
 fn draw_board(board: &Board) {
+    println!("");
     for row in board {
+        print!("         ");
         for state in row {
-            print!("{}", state);
+            print!("{}  ", state);
         }
-        print!("\n");
+        print!("\n\n");
     }
+    println!("");
 }
 
 /// Execute a turn of the game, prompting for input and placing an X or O.
-fn turn(game: &mut Game) {
+/// Returns the piece and coordinates of the move.
+fn turn(game: &mut Game) -> (State, usize, usize) {
+    // Announce turn.
+    let round = ((game.move_count + 1) as f32 / 2.0).ceil() as u32;
+    print!("\n\n");
+    println!("      Round {} - {}'s    ", round, game.next_move);
+    println!("  ----------------------");
+
     loop {
         // Draw board.
-        println!("");
         draw_board(&game.board);
-        println!("");
-
         // Prompt for move.
-        println!("State {}, where will you move?", game.next_move);
+        println!("Where will you move? [x,y]");
+
         let input: String = read!("{}\n");
         let coords: Vec<&str> = input.split(',').collect();
 
         // Ensure input is properly formatted.
         if coords.len() != 2 {
-            println!("Please enter two digits, separated by a comma.");
+            println!("\nPlease enter two digits, separated by a comma.");
             continue;
         }
 
@@ -62,34 +70,35 @@ fn turn(game: &mut Game) {
         let x: usize = match coords[0].parse() {
             Ok(n) => n,
             Err(_) => {
-                println!("Please enter two digits, separated by a comma.");
+                println!("\nPlease enter two digits, separated by a comma.");
                 continue;
             }
         };
         let y: usize = match coords[1].parse() {
             Ok(n) => n,
             Err(_) => {
-                println!("Please enter two digits, separated by a comma.");
+                println!("\nPlease enter two digits, separated by a comma.");
                 continue;
             }
         };
 
         // Ensure coords are in bounds.
         if x > 2 || y > 2 {
-            println!("Coordinates out of bounds. Options are 0, 1, 2.");
+            println!("\nCoordinates out of bounds. Options are 0, 1, 2.");
             continue;
         }
 
         // Ensure space is empty for move.
         if game.board[y][x] != State::Blank {
-            println!("Someone has already moved there!");
+            println!("\nSomeone has already moved there!");
             continue;
         }
 
         // Place board piece and iterate turn.
+        let last_move = game.next_move;
         game.move_count += 1;
 
-        match game.next_move {
+        match last_move {
             State::X => {
                 game.board[y][x] = State::X;
                 game.next_move = State::O;
@@ -101,12 +110,58 @@ fn turn(game: &mut Game) {
             State::Blank => panic!("This should never happen."),
         };
 
-        break;
+        return (last_move, x, y);
     }
 }
 
-fn is_game_over(game: &Game) -> (bool, State) {
-    (false, State::X)
+/// Return whether the game is over, plus the winner, or Blank if its a draw.
+fn is_game_over(game: &Game, state: State, x: usize, y: usize) -> (bool, State) {
+    // Check columns
+    for i in 0..3 {
+        if game.board[i][x] != state {
+            break;
+        }
+        if i == 2 {
+            return (true, state);
+        }
+    }
+    // Check rows
+    for i in 0..3 {
+        if game.board[y][i] != state {
+            break;
+        }
+        if i == 2 {
+            return (true, state);
+        }
+    }
+    if x == y {
+        // Check diagonal
+        for i in 0..3 {
+            if game.board[i][i] != state {
+                break;
+            }
+            if i == 2 {
+                return (true, state);
+            }
+        }
+        // Check anti-diagonal
+        for i in 0..3 {
+            if game.board[i][2 - i] != state {
+                break;
+            }
+            if i == 2 {
+                return (true, state);
+            }
+        }
+    }
+
+    // Check draw
+    if game.move_count == 9 {
+        return (true, State::Blank);
+    }
+
+    // Game continues
+    (false, State::Blank)
 }
 
 /// Play a game from start to finish.
@@ -119,24 +174,34 @@ fn play() {
         move_count: 0,
     };
 
-    println!("\n===========================");
+    println!("");
+    println!("===========================");
     println!("=                         =");
     println!("= Welcome to Tic Tac Toe! =");
     println!("=                         =");
-    println!("===========================\n");
+    println!("===========================");
+    println!("");
 
-    println!("Here is your board:");
+    let (mut game_over, mut winner) = (false, State::Blank);
 
-    loop {
-        turn(&mut game);
+    // Loop until game over
+    while !game_over {
+        let (state, x, y) = turn(&mut game);
+        let result = is_game_over(&game, state, x, y);
+        game_over = result.0;
+        winner = result.1;
+    }
 
-        // let (game_over, winner) = is_game_over(&game);
+    // Display final board
+    println!("");
+    draw_board(&game.board);
+    println!("");
+    println!("Game over!");
 
-        // if game_over {
-        //     println!("Game over!");
-        //     println!("Congratulations, State {}. You win!", winner);
-        //     break;
-        // }
+    // Announce winner or draw
+    match winner {
+        State::Blank => println!("It's a draw!"),
+        _            => println!("Congratulations, Player {}. You win!", winner),
     }
 }
 
