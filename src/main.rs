@@ -167,8 +167,8 @@ fn is_game_over(game: &Game, state: State, x: usize, y: usize) -> (bool, State) 
     (false, State::Blank)
 }
 
-/// Play a game from start to finish.
-fn play() {
+/// Display the game header.
+fn header() {
     println!("");
     println!("===========================");
     println!("=                         =");
@@ -176,24 +176,38 @@ fn play() {
     println!("=                         =");
     println!("===========================");
     println!("");
+}
 
-    // Prompt for game size.
-    let size: usize;
+
+/// Prompt for game size.
+fn prompt_game_size() -> usize {
+    let mut size: usize;
+
     loop {
         println!("\nHow big should the game be?");
         let input: String = read!("{}\n");
+
         size = match input.trim().parse() {
             Ok(n) => n,
             Err(_) => {
-                println!("Please enter a positive integer.");
+                println!("Must be at least 3.");
                 continue;
             },
         };
-        break;
-    }
 
-    // Prompt for who goes first.
+        if size < 3 {
+            println!("Must be at least 3.");
+            continue;
+        }
+
+        return size;
+    }
+}
+
+/// Prompt for who goes first.
+fn prompt_first_move() -> State {
     let first_move: State;
+
     loop {
         println!("\nWho should go first? X or O");
         let input: String = read!("{}\n");
@@ -206,8 +220,31 @@ fn play() {
                 continue;
             },
         };
-        break;
+        return first_move;
     }
+}
+
+/// Draw the final board and announce the winner or draw.
+fn conclusion(board: &Board, winner: State) {
+    // Display final board
+    println!("");
+    draw_board(board);
+    println!("");
+    println!("Game over!");
+
+    // Announce winner or draw
+    match winner {
+        State::Blank => println!("It's a draw!"),
+        _            => println!("{}'s win!", winner),
+    }
+}
+
+/// Play a game from start to finish.
+fn play() {
+    header();
+
+    let size = prompt_game_size();
+    let first_move = prompt_first_move();
 
     let board = vec![vec![State::Blank; size]; size];
 
@@ -229,17 +266,7 @@ fn play() {
         winner = result.1;
     }
 
-    // Display final board
-    println!("");
-    draw_board(&game.board);
-    println!("");
-    println!("Game over!");
-
-    // Announce winner or draw
-    match winner {
-        State::Blank => println!("It's a draw!"),
-        _            => println!("{}'s win!", winner),
-    }
+    conclusion(&game.board, winner);
 }
 
 fn main() {
