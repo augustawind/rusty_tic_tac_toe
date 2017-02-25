@@ -58,16 +58,20 @@ fn turn(game: &mut Game) {
             continue;
         }
 
-        let coords: Vec<u32> = coords.into_iter().map(|n| {
-            match n.parse::<u32>() {
-                Ok(n) => n,
-                // TODO: allow the user to retry
-                Err(_) => panic!("Something went wrong."),
+        let x: usize = match coords[0].parse() {
+            Ok(n) => n,
+            Err(_) => {
+                println!("Please enter two digits, separated by a comma.");
+                continue;
             }
-        }).collect();
-
-        let x = coords[0] as usize;
-        let y = coords[1] as usize;
+        };
+        let y: usize = match coords[1].parse() {
+            Ok(n) => n,
+            Err(_) => {
+                println!("Please enter two digits, separated by a comma.");
+                continue;
+            }
+        };
 
         if x > 2 || y > 2 {
             println!("Coordinates out of bounds. Options are 0, 1, 2.");
