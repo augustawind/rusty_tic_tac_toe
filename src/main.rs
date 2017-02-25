@@ -133,8 +133,8 @@ fn is_game_over(game: &Game, state: State, x: usize, y: usize) -> (bool, State) 
             return (true, state);
         }
     }
+    // Check diagonal
     if x == y {
-        // Check diagonal
         for i in 0..3 {
             if game.board[i][i] != state {
                 break;
@@ -143,7 +143,9 @@ fn is_game_over(game: &Game, state: State, x: usize, y: usize) -> (bool, State) 
                 return (true, state);
             }
         }
-        // Check anti-diagonal
+    }
+    // Check anti-diagonal
+    if x + y == 2 {
         for i in 0..3 {
             if game.board[i][2 - i] != state {
                 break;
