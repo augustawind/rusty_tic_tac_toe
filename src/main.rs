@@ -1,3 +1,5 @@
+#[macro_use] extern crate text_io;
+
 use std::fmt;
 use std::io;
 
@@ -38,24 +40,42 @@ fn draw_board(board: &Board) {
 }
 
 fn turn(game: &mut Game) {
+    // Prompt for next move, retrying on invalid input.
     loop {
         draw_board(&game.board);
 
         println!("Player {}, where will you move?", game.next_move);
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("something went wrong");
 
+        let input: String = read!("{}\n");
         let coords: Vec<&str> = input.split(',').collect();
 
         if coords.len() != 2 {
             println!("Please enter two digits, separated by a comma.");
             continue;
         }
+
+        let coords: Vec<u32> = coords.into_iter().map(|n| {
+            match n.parse::<u32>() {
+                Ok(n) => n,
+                Err(_) => panic!("Something went wrong."),
+            }
+        }).collect();
+
+        let x = coords[0] as usize;
+        let y = coords[1] as usize;
+
+        match game.next_move {
+            Player::X => {
+                game.board[y][x] = 1;
+                game.next_move = Player::O;
+            },
+            Player::O => {
+                game.board[y][x] = 2;
+                game.next_move = Player::X
+            },
+        };
+
         break;
-    }
-    match game.next_move {
-        Player::X => game.next_move = Player::O,
-        Player::O => game.next_move = Player::X,
     }
 }
 
@@ -71,7 +91,17 @@ fn play() {
         next_move: Player::X,
     };
 
-    turn(&mut game);
+    loop {
+        turn(&mut game);
+
+        // let (game_over, winner) = is_game_over(&game);
+
+        // if game_over {
+        //     println!("Game over!");
+        //     println!("Congratulations, Player {}. You win!", winner);
+        //     break;
+        // }
+    }
 }
 
 fn main() {
