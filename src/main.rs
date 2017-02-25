@@ -21,10 +21,11 @@ impl fmt::Display for State {
     }
 }
 
-type Board = [[State; 3]; 3];
+type Board = Vec<Vec<State>>;
 
 struct Game {
     board: Board,
+    size: usize,
     next_move: State,
     move_count: u32,
 }
@@ -33,7 +34,6 @@ struct Game {
 fn draw_board(board: &Board) {
     println!("");
     for row in board {
-        print!("         ");
         for state in row {
             print!("{}  ", state);
         }
@@ -83,7 +83,7 @@ fn turn(game: &mut Game) -> (usize, usize) {
         };
 
         // Ensure coords are in bounds.
-        if x > 2 || y > 2 {
+        if x >= game.size || y >= game.size {
             println!("\nCoordinates out of bounds. Options are 0, 1, 2.");
             continue;
         }
@@ -115,49 +115,51 @@ fn turn(game: &mut Game) -> (usize, usize) {
 
 /// Return whether the game is over, plus the winner, or Blank if its a draw.
 fn is_game_over(game: &Game, state: State, x: usize, y: usize) -> (bool, State) {
+    let n = game.size;
+
     // Check columns
-    for i in 0..3 {
+    for i in 0..n {
         if game.board[i][x] != state {
             break;
         }
-        if i == 2 {
+        if i == n - 1 {
             return (true, state);
         }
     }
     // Check rows
-    for i in 0..3 {
+    for i in 0..n {
         if game.board[y][i] != state {
             break;
         }
-        if i == 2 {
+        if i == n - 1{
             return (true, state);
         }
     }
     // Check diagonal
     if x == y {
-        for i in 0..3 {
+        for i in 0..n {
             if game.board[i][i] != state {
                 break;
             }
-            if i == 2 {
+            if i == n - 1 {
                 return (true, state);
             }
         }
     }
     // Check anti-diagonal
-    if x + y == 2 {
-        for i in 0..3 {
-            if game.board[i][2 - i] != state {
+    if x + y == n - 1 {
+        for i in 0..n {
+            if game.board[i][n - 1 - i] != state {
                 break;
             }
-            if i == 2 {
+            if i == n - 1 {
                 return (true, state);
             }
         }
     }
 
     // Check draw
-    if game.move_count == 9 {
+    if game.move_count == (n * n) as u32 {
         return (true, State::Blank);
     }
 
@@ -167,14 +169,6 @@ fn is_game_over(game: &Game, state: State, x: usize, y: usize) -> (bool, State) 
 
 /// Play a game from start to finish.
 fn play() {
-    let board = [[State::Blank; 3]; 3];
-
-    let mut game = Game {
-        board: board,
-        next_move: State::X,
-        move_count: 0,
-    };
-
     println!("");
     println!("===========================");
     println!("=                         =");
@@ -182,6 +176,47 @@ fn play() {
     println!("=                         =");
     println!("===========================");
     println!("");
+
+    // Prompt for game size.
+    let size: usize;
+    loop {
+        println!("\nHow big should the game be?");
+        let input: String = read!("{}\n");
+        size = match input.trim().parse() {
+            Ok(n) => n,
+            Err(_) => {
+                println!("Please enter a positive integer.");
+                continue;
+            },
+        };
+        break;
+    }
+
+    // Prompt for who goes first.
+    let first_move: State;
+    loop {
+        println!("\nWho should go first? X or O");
+        let input: String = read!("{}\n");
+
+        first_move = match input.to_lowercase().trim() {
+            "x" => State::X,
+            "o" => State::O,
+            _         => {
+                println!("\nPlease enter one of X or O.");
+                continue;
+            },
+        };
+        break;
+    }
+
+    let board = vec![vec![State::Blank; size]; size];
+
+    let mut game = Game {
+        board: board,
+        size: size,
+        next_move: first_move,
+        move_count: 0,
+    };
 
     let (mut game_over, mut winner) = (false, State::Blank);
 
