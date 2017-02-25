@@ -14,7 +14,7 @@ enum State {
 impl fmt::Display for State {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            State::Blank => write!(f, "."),
+            State::Blank => write!(f, "-"),
             State::X => write!(f, "X"),
             State::O => write!(f, "O"),
         }
