@@ -4,6 +4,7 @@
 
 use std::fmt;
 
+/// A position on the board.
 #[derive(Copy, Clone, PartialEq)]
 enum State {
     Blank,
@@ -21,8 +22,10 @@ impl fmt::Display for State {
     }
 }
 
+/// The game board.
 type Board = Vec<Vec<State>>;
 
+/// Current game state.
 struct Game {
     board: Board,
     size: usize,
