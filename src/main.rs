@@ -1,7 +1,8 @@
+//! A simple, 2-player Tic Tac Toe game for the console.
+
 #[macro_use] extern crate text_io;
 
 use std::fmt;
-use std::io;
 
 type Board = [[u32; 3]; 3];
 
@@ -24,6 +25,7 @@ struct Game {
     next_move: Player,
 }
 
+/// Draw the game board.
 fn draw_board(board: &Board) {
     for row in board {
         for code in row {
@@ -39,10 +41,12 @@ fn draw_board(board: &Board) {
     }
 }
 
+/// Execute a turn of the game, prompting for input and placing an X or O.
 fn turn(game: &mut Game) {
-    // Prompt for next move, retrying on invalid input.
     loop {
+        println!("");
         draw_board(&game.board);
+        println!("");
 
         println!("Player {}, where will you move?", game.next_move);
 
@@ -57,12 +61,23 @@ fn turn(game: &mut Game) {
         let coords: Vec<u32> = coords.into_iter().map(|n| {
             match n.parse::<u32>() {
                 Ok(n) => n,
+                // TODO: allow the user to retry
                 Err(_) => panic!("Something went wrong."),
             }
         }).collect();
 
         let x = coords[0] as usize;
         let y = coords[1] as usize;
+
+        if x > 2 || y > 2 {
+            println!("Coordinates out of bounds. Options are 0, 1, 2.");
+            continue;
+        }
+
+        if game.board[y][x] != 0 {
+            println!("Someone has already moved there!");
+            continue;
+        }
 
         match game.next_move {
             Player::X => {
@@ -79,8 +94,13 @@ fn turn(game: &mut Game) {
     }
 }
 
+fn is_game_over(game: &Game) -> bool {
+    false
+}
+
+/// Play a game from start to finish.
 fn play() {
-    let mut board = [
+    let board = [
         [0, 0, 0],
         [0, 0, 0],
         [0, 0, 0],
@@ -90,6 +110,14 @@ fn play() {
         board: board,
         next_move: Player::X,
     };
+
+    println!("\n===========================");
+    println!("=                         =");
+    println!("= Welcome to Tic Tac Toe! =");
+    println!("=                         =");
+    println!("===========================\n");
+
+    println!("Here is your board:");
 
     loop {
         turn(&mut game);
