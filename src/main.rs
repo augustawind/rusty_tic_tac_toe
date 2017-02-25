@@ -26,6 +26,7 @@ impl fmt::Display for State {
 struct Game {
     board: Board,
     next_move: State,
+    move_count: u32,
 }
 
 /// Draw the game board.
@@ -86,6 +87,8 @@ fn turn(game: &mut Game) {
         }
 
         // Place board piece and iterate turn.
+        game.move_count += 1;
+
         match game.next_move {
             State::X => {
                 game.board[y][x] = State::X;
@@ -113,6 +116,7 @@ fn play() {
     let mut game = Game {
         board: board,
         next_move: State::X,
+        move_count: 0,
     };
 
     println!("\n===========================");
