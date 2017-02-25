@@ -4,25 +4,28 @@
 
 use std::fmt;
 
-type Board = [[u32; 3]; 3];
-
-enum Player {
+#[derive(Copy, Clone, PartialEq)]
+enum State {
+    Blank,
     X,
     O,
 }
 
-impl fmt::Display for Player {
+type Board = [[State; 3]; 3];
+
+impl fmt::Display for State {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Player::X => write!(f, "X"),
-            Player::O => write!(f, "O"),
+            State::Blank => write!(f, "."),
+            State::X => write!(f, "X"),
+            State::O => write!(f, "O"),
         }
     }
 }
 
 struct Game {
     board: Board,
-    next_move: Player,
+    next_move: State,
 }
 
 /// Draw the game board.
@@ -30,11 +33,9 @@ fn draw_board(board: &Board) {
     for row in board {
         for code in row {
             match *code {
-                0 => print!("."),
-                1 => print!("X"),
-                2 => print!("O"),
-                _ => panic!("Invalid value for board piece: '{}'. \
-                             Accepted values are 0, 1, 2.", code),
+                State::Blank => print!("."),
+                State::X => print!("X"),
+                State::O => print!("O"),
             }
         }
         print!("\n");
@@ -50,7 +51,7 @@ fn turn(game: &mut Game) {
         println!("");
 
         // Prompt for move.
-        println!("Player {}, where will you move?", game.next_move);
+        println!("State {}, where will you move?", game.next_move);
         let input: String = read!("{}\n");
         let coords: Vec<&str> = input.split(',').collect();
 
@@ -83,42 +84,39 @@ fn turn(game: &mut Game) {
         }
 
         // Ensure space is empty for move.
-        if game.board[y][x] != 0 {
+        if game.board[y][x] != State::Blank {
             println!("Someone has already moved there!");
             continue;
         }
 
         // Place board piece and iterate turn.
         match game.next_move {
-            Player::X => {
-                game.board[y][x] = 1;
-                game.next_move = Player::O;
+            State::X => {
+                game.board[y][x] = State::X;
+                game.next_move = State::O;
             },
-            Player::O => {
-                game.board[y][x] = 2;
-                game.next_move = Player::X
+            State::O => {
+                game.board[y][x] = State::O;
+                game.next_move = State::X
             },
+            State::Blank => panic!("This should never happen."),
         };
 
         break;
     }
 }
 
-fn is_game_over(game: &Game) -> bool {
-    false
+fn is_game_over(game: &Game) -> (bool, State) {
+    (false, State::X)
 }
 
 /// Play a game from start to finish.
 fn play() {
-    let board = [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-    ];
+    let board = [[State::Blank; 3]; 3];
 
     let mut game = Game {
         board: board,
-        next_move: Player::X,
+        next_move: State::X,
     };
 
     println!("\n===========================");
@@ -136,7 +134,7 @@ fn play() {
 
         // if game_over {
         //     println!("Game over!");
-        //     println!("Congratulations, Player {}. You win!", winner);
+        //     println!("Congratulations, State {}. You win!", winner);
         //     break;
         // }
     }
