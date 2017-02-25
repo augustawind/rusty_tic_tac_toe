@@ -31,12 +31,8 @@ struct Game {
 /// Draw the game board.
 fn draw_board(board: &Board) {
     for row in board {
-        for code in row {
-            match *code {
-                State::Blank => print!("."),
-                State::X => print!("X"),
-                State::O => print!("O"),
-            }
+        for state in row {
+            print!("{}", state);
         }
         print!("\n");
     }
