@@ -11,8 +11,6 @@ enum State {
     O,
 }
 
-type Board = [[State; 3]; 3];
-
 impl fmt::Display for State {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
@@ -22,6 +20,8 @@ impl fmt::Display for State {
         }
     }
 }
+
+type Board = [[State; 3]; 3];
 
 struct Game {
     board: Board,
@@ -43,8 +43,8 @@ fn draw_board(board: &Board) {
 }
 
 /// Execute a turn of the game, prompting for input and placing an X or O.
-/// Returns the piece and coordinates of the move.
-fn turn(game: &mut Game) -> (State, usize, usize) {
+/// Returns the coordinates of the move.
+fn turn(game: &mut Game) -> (usize, usize) {
     // Announce turn.
     let round = ((game.move_count + 1) as f32 / 2.0).ceil() as u32;
     print!("\n\n");
@@ -95,10 +95,9 @@ fn turn(game: &mut Game) -> (State, usize, usize) {
         }
 
         // Place board piece and iterate turn.
-        let last_move = game.next_move;
         game.move_count += 1;
 
-        match last_move {
+        match game.next_move {
             State::X => {
                 game.board[y][x] = State::X;
                 game.next_move = State::O;
@@ -110,7 +109,7 @@ fn turn(game: &mut Game) -> (State, usize, usize) {
             State::Blank => panic!("This should never happen."),
         };
 
-        return (last_move, x, y);
+        return (x, y);
     }
 }
 
@@ -186,8 +185,9 @@ fn play() {
 
     // Loop until game over
     while !game_over {
-        let (state, x, y) = turn(&mut game);
-        let result = is_game_over(&game, state, x, y);
+        let last_state = game.next_move;
+        let (x, y) = turn(&mut game);
+        let result = is_game_over(&game, last_state, x, y);
         game_over = result.0;
         winner = result.1;
     }
@@ -201,7 +201,7 @@ fn play() {
     // Announce winner or draw
     match winner {
         State::Blank => println!("It's a draw!"),
-        _            => println!("Congratulations, Player {}. You win!", winner),
+        _            => println!("{}'s win!", winner),
     }
 }
 
