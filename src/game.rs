@@ -1,5 +1,4 @@
 //! Core data structures and methods.
-
 use std::fmt;
 
 /// A position on the board.
@@ -32,7 +31,6 @@ pub struct Game {
 }
 
 impl Game {
-
     /// Initialize a new Game.
     pub fn new(size: usize, first_move: State) -> Game {
         let board = vec![vec![State::Blank; size]; size];
@@ -161,7 +159,7 @@ impl Game {
             if self.board[y][i] != state {
                 break;
             }
-            if i == n - 1{
+            if i == n - 1 {
                 return (true, state);
             }
         }

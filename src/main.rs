@@ -1,5 +1,4 @@
 //! A simple, 2-player Tic Tac Toe game for the console.
-
 #[macro_use] extern crate text_io;
 
 mod game;
