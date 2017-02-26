@@ -5,13 +5,13 @@ mod game;
 
 /// Display the game header.
 fn show_header() {
-    println!("");
-    println!("===========================");
-    println!("=                         =");
-    println!("= Welcome to Tic Tac Toe! =");
-    println!("=                         =");
-    println!("===========================");
-    println!("");
+    println!("\n\
+        ===========================\n\
+        =                         =\n\
+        = Welcome to Tic Tac Toe! =\n\
+        =                         =\n\
+        ===========================\n\
+    ");
 }
 
 
